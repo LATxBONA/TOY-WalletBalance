@@ -211,7 +211,7 @@
 
     .hidden { display: none; }
 
-    /* KHUNG BẢNG */
+    /* KHUNG BẢNG GIỮ NGUYÊN BẢN CHO DESKTOP (ÔM SÁT VỪA KHÍT) */
     .table-responsive-center {
       width: 100%;
       display: flex;
@@ -329,6 +329,102 @@
       margin-top: 24px;
       font-size: 12px;
       line-height: 1.6;
+    }
+
+    /* --- CHỈ ÁP DỤNG THAY ĐỔI DÀNH RIÊNG CHO ĐIỆN THOẠI (DƯỚI 768px) --- */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px 6px;
+      }
+
+      .form-grid, .form-grid-second {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .table-responsive-center {
+        display: block;
+      }
+
+      .grid-table, .summary-grid {
+        display: flex;
+        width: 100%;
+        border: none;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .grid-table .grid-header,
+      .summary-grid .summary-header {
+        display: none;
+      }
+
+      .grid-row {
+        display: flex;
+        flex-direction: column;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 10px;
+        padding: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      }
+
+      .grid-row > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0 !important;
+        border-right: none !important;
+        border-bottom: 1px dashed var(--accent);
+        text-align: right;
+      }
+
+      .grid-row > div:last-child {
+        border-bottom: none;
+        padding-top: 10px !important;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .grid-row > div:nth-child(1)::before { content: "Ngày:"; font-weight: 600; color: var(--muted); }
+      .grid-row > div:nth-child(2)::before { content: "Tên khoản:"; font-weight: 600; color: var(--muted); }
+      .grid-row > div:nth-child(3)::before { content: "Người trả:"; font-weight: 600; color: var(--muted); }
+      .grid-row > div:nth-child(4)::before { content: "Chi tiết:"; font-weight: 600; color: var(--muted); align-self: flex-start; }
+      .grid-row > div:nth-child(5)::before { content: "Tổng tiền:"; font-weight: 600; color: var(--muted); }
+
+      .grid-row > div:nth-child(4) {
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .summary-row {
+        display: flex;
+        flex-direction: column;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        padding: 10px 12px;
+      }
+
+      .summary-row > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0 !important;
+        border-right: none !important;
+        border-bottom: 1px dashed var(--accent);
+      }
+
+      .summary-row > div:last-child {
+        border-bottom: none;
+      }
+
+      .summary-row > div:nth-child(1)::before { content: "Thành viên:"; font-weight: 600; color: var(--muted); }
+      .summary-row > div:nth-child(2)::before { content: "Đã trả:"; font-weight: 600; color: var(--muted); }
+      .summary-row > div:nth-child(3)::before { content: "Cần trả:"; font-weight: 600; color: var(--muted); }
+      .summary-row > div:nth-child(4)::before { content: "Còn lại:"; font-weight: 600; color: var(--muted); }
     }
   </style>
 </head>
