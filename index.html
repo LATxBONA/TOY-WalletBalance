@@ -4,374 +4,647 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Wallet Balance - Kết hợp Chia đều & Tính riêng</title>
+
   <style>
-    :root{--muted:#777;--card:#fff;--bg:#f4f4f4;--accent:#e2f0d9}
-    body{
+    :root {
+      color-scheme: light;
+      --muted: #64748b;
+      --card: #ffffff;
+      --bg: #f8fafc;
+      --text: #1e293b;
+      --accent: #e2e8f0;
+      --border: #cbd5e1;
+      --primary: #2563eb;
+      --shadow: 0 4px 16px rgba(15, 23, 42, .06);
+    }
+
+    body.dark-mode {
+      color-scheme: dark;
+      --muted: #94a3b8;
+      --card: #1e293b;
+      --bg: #0f172a;
+      --text: #e2e8f0;
+      --accent: #334155;
+      --border: #475569;
+      --primary: #3b82f6;
+      --shadow: 0 4px 16px rgba(0, 0, 0, .2);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
       font-family: Arial, Helvetica, sans-serif;
       background: var(--bg);
-      margin:0;
-      padding:20px;
-      color:#222;
+      margin: 0;
+      padding: 20px 12px;
+      color: var(--text);
     }
-    h1{ text-align:center; margin:6px 0 18px }
-    .card{
-      background:var(--card);
-      padding:14px;
-      border-radius:8px;
-      box-shadow:0 1px 4px rgba(0,0,0,0.06);
-      margin-bottom:18px;
+
+    .page-container {
+      width: min(100%, 900px);
+      margin: 0 auto;
     }
-    .form-row{ display:flex; gap:10px; align-items:center; margin-bottom:8px; }
-    .form-row > * { flex:1; min-width:0; }
-    label{ font-size:13px; color:var(--muted); margin-bottom:6px; display:block }
-    input[type="text"], input[type="number"], input[type="date"], select {
-      padding:8px 10px;
-      border:1px solid #ddd;
-      border-radius:6px;
-      width:100%;
-      box-sizing:border-box;
-      font-size:14px;
+
+    .page-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin-bottom: 16px;
+      gap: 16px;
     }
+
+    h1 {
+      text-align: center;
+      margin: 4px 0;
+      font-size: clamp(22px, 2.5vw, 28px);
+      background: linear-gradient(135deg, #2563eb, #9333ea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-size: 17px;
+      margin: 0 0 10px 0;
+    }
+
+    /* NÚT ĐỔI SÁNG/TỐI SẶC SỠ HƠN */
+    .theme-toggle {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    body.dark-mode .theme-toggle {
+      background: linear-gradient(135deg, #1e293b, #334155);
+    }
+    .theme-toggle:hover {
+      transform: translateY(-52%) scale(1.03);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    }
+
+    .card {
+      background: var(--card);
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr 150px;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .form-grid-second {
+      display: grid;
+      grid-template-columns: 160px 1fr 130px;
+      gap: 10px;
+      align-items: end;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: block;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 6px;
+      width: 100%;
+      font-size: 13px;
+      min-height: 34px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* --- CÁC NÚT BẤM SẶC SỠ VÀ HIỆU ỨNG HOVER --- */
     button {
-      padding:9px 12px;
-      border-radius:6px;
+      padding: 6px 14px;
+      border-radius: 8px;
       border: none;
-      cursor:pointer;
-      background:#1976d2;
-      color:white;
-      font-weight:600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      font-weight: 600;
+      font-size: 13px;
+      height: 34px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    button.ghost { background:transparent; color:#1976d2; border:1px solid #1976d2 }
-    button.remove { background:#d9534f }
-    .small { padding:6px 8px; font-size:13px }
-    .hidden{ display:none }
-    table { width:100%; border-collapse:collapse; margin-top:10px; background:var(--card); }
-    th, td { border:1px solid #e7e7e7; padding:8px; text-align:center; font-size:14px }
-    th { background:var(--accent); font-weight:700 }
-    .ind-row{ display:flex; gap:8px; align-items:center; margin-bottom:6px }
-    .ind-row input[type="text"]{ padding:7px; border-radius:6px; border:1px solid #ddd }
-    .ind-item{ flex:2; min-width:0 }
-    .ind-person{ flex:1; min-width:0 }
-    .ind-amount{ width:120px; flex:0 0 120px }
-    .ind-row .remove-btn { background:#d9534f; color:#fff; border:none; padding:6px 8px; border-radius:6px; cursor:pointer }
-    .footer { text-align:center; color:var(--muted); margin-top:30px; font-size:13px }
-    @media (max-width:700px){
-      .form-row{ flex-direction:column }
-      .ind-row{ flex-direction:column; align-items:stretch }
-      .ind-amount{ width:100% }
+
+    button:hover {
+      background: linear-gradient(135deg, #1d4ed8, #1e40af);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    /* Nút GHOST (Thêm dòng món) mang màu sắc nổi bật sinh động */
+    button.ghost {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
+    }
+    body.dark-mode button.ghost {
+      background: linear-gradient(135deg, #1e3a8a33, #1e40af44);
+      color: #60a5fa;
+      border-color: #3b82f666;
+    }
+    button.ghost:hover {
+      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    /* Nút XÓA / XÓA LỊCH SỬ mang sắc đỏ gradient bắt mắt */
+    button.remove {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    button.remove:hover {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+    }
+
+    .small {
+      padding: 4px 10px;
+      font-size: 12px;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .hidden { display: none; }
+
+    /* KHUNG BẢNG */
+    .table-responsive-center {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+
+    .grid-table {
+      display: inline-flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      max-width: 100%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .grid-header {
+      display: grid;
+      grid-template-columns: 100px 120px 90px minmax(180px, auto) 95px 100px;
+      background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+      font-weight: 700;
+      font-size: 12px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    body.dark-mode .grid-header {
+      background: linear-gradient(135deg, #1e293b, #334155);
+    }
+
+    .grid-header > div, .grid-row > div {
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .grid-header > div:last-child, .grid-row > div:last-child {
+      border-right: none;
+    }
+
+    .grid-row {
+      display: grid;
+      grid-template-columns: 100px 120px 90px minmax(180px, auto) 95px 100px;
+      font-size: 12.5px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      transition: background 0.15s;
+    }
+    .grid-row:hover {
+      background: rgba(37, 99, 235, 0.02);
+    }
+
+    .grid-row:last-child { border-bottom: none; }
+    .grid-row .text-left { justify-content: flex-start; text-align: left; }
+
+    .summary-grid {
+      display: inline-flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .summary-header {
+      display: grid;
+      grid-template-columns: 150px 110px 110px 110px;
+      background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+      font-weight: 700;
+      font-size: 12px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    body.dark-mode .summary-header {
+      background: linear-gradient(135deg, #1e293b, #334155);
+    }
+
+    .summary-header > div, .summary-row > div {
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .summary-header > div:last-child, .summary-row > div:last-child { border-right: none; }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: 150px 110px 110px 110px;
+      font-size: 12.5px;
+      border-bottom: 1px solid var(--border);
+    }
+    .summary-row:hover {
+      background: rgba(37, 99, 235, 0.02);
+    }
+    .summary-row:last-child { border-bottom: none; }
+
+    .ind-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .ind-item { flex: 2; }
+    .ind-person { flex: 1; }
+    .ind-amount { width: 100px; flex: 0 0 100px; }
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 24px;
+      font-size: 12px;
+      line-height: 1.6;
     }
   </style>
 </head>
+
 <body>
+  <div class="page-container">
+    <header class="page-header">
+      <h1>Wallet Balance — Hỗ trợ Chia tiền</h1>
+      <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span>
+        <span id="theme-label">Chế độ tối</span>
+      </button>
+    </header>
 
-  <h1 style="display:flex;justify-content:center;align-items:center;gap:10px;">Wallet Balance — Hỗ trợ Chia tiền</h1>
-
-  <div class="card" id="main-form">
-    <div class="form-row">
-      <div style="flex:0 0 180px">
-        <label>Ngày</label>
-        <input type="date" id="date">
-      </div>
-      <div>
-        <label>Tên khoản / Buổi</label>
-        <input type="text" id="title" placeholder="Ví dụ: Buổi đi ABC - Nhóm xyz ">
-      </div>
-      <div style="flex:0 0 220px">
-        <label>Người trả</label>
-        <input type="text" id="payer" placeholder="Ai trả hoá đơn (tên)">
-      </div>
-    </div>
-
-    <div class="form-row" style="align-items:flex-end">
-      <div style="flex:0 0 200px">
-        <label>Kiểu chia</label>
-        <select id="split-type" onchange="toggleSplitType()">
-          <option value="equal">Chia đều (group)</option>
-          <option value="individual">Tính riêng (mỗi món 1-1)</option>
-        </select>
-      </div>
-
-      <div style="flex:1">
-        <label id="lbl-either">Tùy chọn</label>
-        <div id="equal-section">
-          <input type="number" id="amount" placeholder="Tổng tiền (đ) — chỉ cho Chia đều">
-          <input type="text" id="participants" placeholder="Người tham gia (phân cách bằng dấu phẩy) — chỉ cho Chia đều">
+    <div class="card">
+      <div class="form-grid">
+        <div>
+          <label>Ngày</label>
+          <input type="date" id="date">
         </div>
-
-        <div id="individual-section" class="hidden">
-          <div id="individual-list"></div>
-          <div style="display:flex; gap:8px; margin-top:6px">
-            <button type="button" onclick="addIndividualRow()" class="small ghost">+ Thêm dòng món</button>
-            <div style="flex:1"></div>
-          </div>
-          <div style="margin-top:6px; color:var(--muted); font-size:13px">
-            Mỗi dòng = 1 món <strong>Tên món</strong> (tùy), <strong>Tên người gọi</strong> và <strong>Số tiền</strong>.
-          </div>
+        <div>
+          <label>Tên khoản / Buổi</label>
+          <input type="text" id="title" placeholder="Ví dụ: xem phim">
+        </div>
+        <div>
+          <label>Người trả</label>
+          <input type="text" id="payer" placeholder="Tên người trả">
         </div>
       </div>
 
-      <div style="flex:0 0 160px">
-        <label style="opacity:0">action</label>
-        <button onclick="addExpense()" style="width:100%">Thêm chi phí</button>
+      <div class="form-grid-second">
+        <div>
+          <label>Kiểu chia</label>
+          <select id="split-type" onchange="toggleSplitType()">
+            <option value="equal">Chia đều (group)</option>
+            <option value="individual">Tính riêng (mỗi món)</option>
+          </select>
+        </div>
+
+        <div>
+          <label id="lbl-either">Tùy chọn</label>
+          <div id="equal-section">
+            <input type="number" id="amount" placeholder="Tổng tiền (đ)">
+            <input type="text" id="participants" placeholder="Người tham gia (cách nhau dấu phẩy)" style="margin-top: 6px;">
+          </div>
+
+          <div id="individual-section" class="hidden">
+            <div id="individual-list"></div>
+            <button type="button" onclick="addIndividualRow()" class="small ghost" style="margin-top: 6px;">+ Thêm dòng món</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="opacity:0">action</label>
+          <button onclick="addExpense()" style="width:100%">Thêm chi phí</button>
+        </div>
       </div>
+    </div>
+
+    <div class="card">
+      <h2>Chi tiết</h2>
+      <div class="table-responsive-center">
+        <div class="grid-table" id="expense-grid-table">
+          <div class="grid-header">
+            <div>Ngày</div>
+            <div>Tên</div>
+            <div>Người trả</div>
+            <div>Chi tiết (ai — số tiền)</div>
+            <div>Tổng</div>
+            <div>Hành động</div>
+          </div>
+          <div class="grid-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Tổng kết</h2>
+      <button onclick="clearHistory()" class="small remove" style="margin-bottom: 8px;">Xóa lịch sử</button>
+      <div class="table-responsive-center">
+        <div class="summary-grid" id="summary-grid-table">
+          <div class="summary-header">
+            <div>Tên</div>
+            <div>Đã trả</div>
+            <div>Cần trả</div>
+            <div>Còn lại</div>
+          </div>
+          <div class="summary-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      © 2025 <strong>LATxBONA</strong> — Thiết kế & phát triển bởi <strong>LAT</strong><br>
+      Ứng dụng: Wallet Balance — Kết hợp chia đều & tính riêng
     </div>
   </div>
 
-  <div class="card">
-    <h2 style="margin:6px 0">Chi tiết</h2>
-    <table id="expense-table">
-      <thead>
-        <tr>
-          <th>Ngày</th>
-          <th>Tên</th>
-          <th>Người trả</th>
-          <th>Chi tiết (ai — số tiền)</th>
-          <th>Tổng</th>
-          <th>Hành động</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <script>
+    let expenses = [];
 
-  <div class="card">
-    <h2 style="margin:6px 0">Tổng kết</h2>
-    <button onclick="clearHistory()" class="small remove" style="margin-left:20px;">Xóa lịch sử</button>
-    <table id="summary-table">
-      <thead>
-        <tr><th>Tên</th><th>Đã trả</th><th>Cần trả</th><th>Còn lại</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="footer">
-    © 2025 <strong>LATxBONA</strong> — Thiết kế & phát triển bởi <strong>LAT</strong><br>
-    Ứng dụng: Wallet Balance — Kết hợp chia đều & tính riêng
-  </div>
-
-<script>
-  let expenses = [];
-
-  // Hiển thị / ẩn section
-  function toggleSplitType() {
-    const t = document.getElementById('split-type').value;
-    document.getElementById('equal-section').classList.toggle('hidden', t !== 'equal');
-    document.getElementById('individual-section').classList.toggle('hidden', t !== 'individual');
-  }
-
-  // Thêm 1 dòng "món" trong chế độ individual
-  function addIndividualRow(name = '', amount = '', itemName = '') {
-    const list = document.getElementById('individual-list');
-    const div = document.createElement('div');
-    div.className = 'ind-row';
-    div.innerHTML = `
-      <input type="text" class="ind-item" placeholder="Tên món (tuỳ)" value="${escapeHtml(itemName)}">
-      <input type="text" class="ind-person" placeholder="Tên người gọi" value="${escapeHtml(name)}">
-      <input type="number" class="ind-amount" placeholder="Số tiền (đ)" value="${amount === '' ? '' : Number(amount)}">
-      <button type="button" class="remove-btn" onclick="this.parentElement.remove()">X</button>
-    `;
-    list.appendChild(div);
-  }
-
-  // Thêm chi phí (cả 2 kiểu đều & individual)
-  function addExpense() {
-    const date = document.getElementById('date').value;
-    const title = document.getElementById('title').value.trim();
-    const payer = document.getElementById('payer').value.trim();
-    const type = document.getElementById('split-type').value;
-
-    if (!date || !title || !payer) {
-      alert('Vui lòng điền ngày, tên và người trả.');
-      return;
+    function applyTheme(isDark) {
+      document.body.classList.toggle('dark-mode', isDark);
+      document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+      document.getElementById('theme-label').textContent = isDark ? 'Chế độ sáng' : 'Chế độ tối';
+      localStorage.setItem('wallet-theme', isDark ? 'dark' : 'light');
     }
 
-    const exp = { date, title, payer, type, details: [], amount: 0 };
+    function toggleTheme() {
+      applyTheme(!document.body.classList.contains('dark-mode'));
+    }
 
-    if (type === 'equal') {
-      const amount = parseFloat(document.getElementById('amount').value);
-      const participants = document.getElementById('participants').value
-        .split(',').map(s => s.trim()).filter(s => s);
-      if (!amount || participants.length === 0) {
-        alert('Chia đều: nhập tổng tiền và ít nhất 1 người tham gia.');
+    function toggleSplitType() {
+      const type = document.getElementById('split-type').value;
+      document.getElementById('equal-section').classList.toggle('hidden', type !== 'equal');
+      document.getElementById('individual-section').classList.toggle('hidden', type !== 'individual');
+    }
+
+    function addIndividualRow(name = '', amount = '', itemName = '') {
+      const list = document.getElementById('individual-list');
+      const div = document.createElement('div');
+      div.className = 'ind-row';
+      div.innerHTML = `
+        <input type="text" class="ind-item" placeholder="Tên món" value="${escapeHtml(itemName)}">
+        <input type="text" class="ind-person" placeholder="Người gọi" value="${escapeHtml(name)}">
+        <input type="number" class="ind-amount" placeholder="Tiền (đ)" value="${amount === '' ? '' : Number(amount)}">
+        <button type="button" class="remove-btn small remove" onclick="this.parentElement.remove()">X</button>
+      `;
+      list.appendChild(div);
+    }
+
+    function addExpense() {
+      const date = document.getElementById('date').value;
+      const title = document.getElementById('title').value.trim();
+      const payer = document.getElementById('payer').value.trim();
+      const type = document.getElementById('split-type').value;
+
+      if (!date || !title || !payer) {
+        alert('Vui lòng điền ngày, tên và người trả.');
         return;
       }
-      const per = amount / participants.length;
-      participants.forEach(name => exp.details.push({ name, owe: per }));
-      exp.amount = amount;
-    } else { // individual
-    const rows = document.querySelectorAll('#individual-list .ind-row');
-    if (rows.length === 0) {
-        alert('Tính riêng: hãy thêm ít nhất 1 dòng món.');
-        return;
-    }
-    let total = 0;
-    rows.forEach(r => {
-        const itemName = r.querySelector('.ind-item').value.trim();
-        const names = r.querySelector('.ind-person').value
-            .split(',')
-            .map(s => s.trim())
-            .filter(s => s);
-        const amt = parseFloat(r.querySelector('.ind-amount').value);
 
-        if (names.length === 0 || !amt || isNaN(amt)) {
-            return; // bỏ qua dòng không hợp lệ
+      const expense = { date, title, payer, type, details: [], amount: 0 };
+
+      if (type === 'equal') {
+        const amount = parseFloat(document.getElementById('amount').value);
+        const participants = document.getElementById('participants').value.split(',').map(n => n.trim()).filter(n => n);
+
+        if (!amount || amount <= 0 || participants.length === 0) {
+          alert('Vui lòng nhập tổng tiền và người tham gia hợp lệ.');
+          return;
         }
 
-        // Giá mỗi suất → nhân cho số người
-        names.forEach(name => {
-            exp.details.push({ name, owe: amt, itemName });
+        const perPerson = amount / participants.length;
+        participants.forEach(name => expense.details.push({ name, owe: perPerson }));
+        expense.amount = amount;
+      } else {
+        const rows = document.querySelectorAll('#individual-list .ind-row');
+        if (rows.length === 0) {
+          alert('Vui lòng thêm ít nhất 1 dòng món.');
+          return;
+        }
+
+        let total = 0;
+        rows.forEach(row => {
+          const itemName = row.querySelector('.ind-item').value.trim();
+          const names = row.querySelector('.ind-person').value.split(',').map(n => n.trim()).filter(n => n);
+          const amount = parseFloat(row.querySelector('.ind-amount').value);
+
+          if (names.length === 0 || !amount || amount <= 0) return;
+
+          names.forEach(name => expense.details.push({ name, owe: amount, itemName }));
+          total += amount * names.length;
         });
-        total += amt * names.length; // tổng cộng
-    });
-    if (exp.details.length === 0) {
-        alert('Không có dòng món hợp lệ (cần tên người và số tiền).');
-        return;
-    }
-    exp.amount = total;
-}
 
-    // Thêm vào danh sách
-    expenses.push(exp);
-    // cập nhật bảng + summary
-    localStorage.setItem('expenses', JSON.stringify(expenses));
-    renderTable();
-    updateSummary();
+        if (expense.details.length === 0) {
+          alert('Vui lòng điền đầy đủ thông tin món.');
+          return;
+        }
+        expense.amount = total;
+      }
 
-    // Reset form (giữ lại ngày theo ý bạn)
-    document.getElementById('title').value = '';
-    document.getElementById('payer').value = '';
-    document.getElementById('amount').value = '';
-    document.getElementById('participants').value = '';
-    document.getElementById('individual-list').innerHTML = '';
-    // giữ ngày nếu muốn: nothing to do
-  }
+      expenses.push(expense);
+      saveExpenses();
+      renderTable();
+      updateSummary();
 
-  // Render bảng chi tiết với nút Sửa
-  function renderTable() {
-    const tbody = document.querySelector('#expense-table tbody');
-    tbody.innerHTML = '';
-    expenses.forEach((e, idx) => {
-      const detailsTxt = e.details.map(d => {
-        const label = d.itemName ? `${d.itemName}: ` : '';
-        return `${label}${d.name} — ${numberFormat(d.owe)} đ`;
-      }).join('<br>');
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${formatDate(e.date)}</td>
-        <td style="text-align:left; padding-left:10px">${escapeHtml(e.title)}</td>
-        <td>${escapeHtml(e.payer)}</td>
-        <td style="text-align:left; padding-left:10px">${detailsTxt}</td>
-        <td>${numberFormat(e.amount)} đ</td>
-        <td>
-          <button class="small" onclick="editExpense(${idx})">Sửa</button>
-          <button class="small remove" onclick="deleteExpense(${idx})">Xóa</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // Xóa expense
-  function deleteExpense(i){
-    if(!confirm('Xóa khoản này?')) return;
-    expenses.splice(i,1);
-    renderTable();
-    updateSummary();
-  }
-
-  // Sửa: remove item rồi đưa dữ liệu quay lại form
-  function editExpense(i){
-    const e = expenses.splice(i,1)[0]; // remove and get
-    // fill form
-    document.getElementById('date').value = e.date;
-    document.getElementById('title').value = e.title;
-    document.getElementById('payer').value = e.payer;
-    document.getElementById('split-type').value = e.type;
-    toggleSplitType();
-
-    if (e.type === 'equal') {
-      document.getElementById('amount').value = e.amount;
-      // participants from details
-      const parts = e.details.map(d => d.name).join(', ');
-      document.getElementById('participants').value = parts;
-    } else {
-      // build rows
-      const list = document.getElementById('individual-list');
-      list.innerHTML = '';
-      e.details.forEach(d => addIndividualRow(d.name, d.owe, d.itemName || ''));
+      document.getElementById('title').value = '';
+      document.getElementById('payer').value = '';
+      document.getElementById('amount').value = '';
+      document.getElementById('participants').value = '';
+      document.getElementById('individual-list').innerHTML = '';
+      addIndividualRow();
     }
 
-    renderTable();
-    updateSummary();
-    // focus title
-    document.getElementById('title').focus();
-  }
+    function saveExpenses() {
+      localStorage.setItem('expenses', JSON.stringify(expenses));
+    }
 
-  // Summary tổng kết
-  function updateSummary(){
-    const sum = {};
-    expenses.forEach(e => {
-      // người trả
-      sum[e.payer] = sum[e.payer] || { paid:0, owe:0 };
-      sum[e.payer].paid += e.amount;
-      // chi tiết
-      e.details.forEach(d => {
-        sum[d.name] = sum[d.name] || { paid:0, owe:0 };
-        sum[d.name].owe += d.owe;
+    function renderTable() {
+      const body = document.querySelector('#expense-grid-table .grid-body');
+      body.innerHTML = '';
+
+      expenses.forEach((expense, index) => {
+        const detailsText = expense.details.map(d => `${d.itemName ? d.itemName + ': ' : ''}${d.name} — ${numberFormat(d.owe)} đ`).join('<br>');
+        const row = document.createElement('div');
+        row.className = 'grid-row';
+        row.innerHTML = `
+          <div>${formatDate(expense.date)}</div>
+          <div class="text-left" style="padding-left:8px">${escapeHtml(expense.title)}</div>
+          <div>${escapeHtml(expense.payer)}</div>
+          <div class="text-left" style="padding-left:8px">${detailsText}</div>
+          <div>${numberFormat(expense.amount)} đ</div>
+          <div>
+            <button class="small" onclick="editExpense(${index})">Sửa</button>
+            <button class="small remove" onclick="deleteExpense(${index})" style="margin-left:6px">Xóa</button>
+          </div>
+        `;
+        body.appendChild(row);
       });
-    });
-    // render
-    const tbody = document.querySelector('#summary-table tbody');
-    tbody.innerHTML = '';
-    Object.keys(sum).sort().forEach(name => {
-      const { paid, owe } = sum[name];
-      const bal = paid - owe;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${escapeHtml(name)}</td>
-        <td>${numberFormat(paid)} đ</td>
-        <td>${numberFormat(owe)} đ</td>
-        <td style="font-weight:700">${bal >= 0 ? '+' : ''}${numberFormat(bal)} đ</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
+    }
 
-  // Helpers
-  function formatDate(d){
-    if(!d) return '';
-    const [y,m,day] = d.split('-');
-    return `${day}/${m}/${y}`;
-  }
-  function numberFormat(n){ return Number(n).toLocaleString(); }
-  function escapeHtml(s){
-    if(!s) return '';
-    return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
-  }
-
-  // init default: one row for individual to guide user
-  addIndividualRow();
-
-  // Load saved data
-  window.onload = function() {
-    const saved = localStorage.getItem('expenses');
-    if (saved) {
-      expenses = JSON.parse(saved);
+    function deleteExpense(index) {
+      if (!confirm('Xóa khoản này?')) return;
+      expenses.splice(index, 1);
+      saveExpenses();
       renderTable();
       updateSummary();
     }
-  };
 
-  // Clear history
-  function clearHistory() {
-    if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử?')) {
-      expenses = [];
-      localStorage.removeItem('expenses');
+    function editExpense(index) {
+      const expense = expenses[index];
+      document.getElementById('date').value = expense.date;
+      document.getElementById('title').value = expense.title;
+      document.getElementById('payer').value = expense.payer;
+      document.getElementById('split-type').value = expense.type;
+      toggleSplitType();
+
+      if (expense.type === 'equal') {
+        document.getElementById('amount').value = expense.amount;
+        document.getElementById('participants').value = expense.details.map(d => d.name).join(', ');
+      } else {
+        const list = document.getElementById('individual-list');
+        list.innerHTML = '';
+        expense.details.forEach(d => addIndividualRow(d.name, d.owe, d.itemName || ''));
+      }
+
+      expenses.splice(index, 1);
+      saveExpenses();
       renderTable();
       updateSummary();
     }
-  }
-</script>
+
+    function updateSummary() {
+      const summary = {};
+      expenses.forEach(expense => {
+        summary[expense.payer] = summary[expense.payer] || { paid: 0, owe: 0 };
+        summary[expense.payer].paid += expense.amount;
+        expense.details.forEach(detail => {
+          summary[detail.name] = summary[detail.name] || { paid: 0, owe: 0 };
+          summary[detail.name].owe += detail.owe;
+        });
+      });
+
+      const body = document.querySelector('#summary-grid-table .summary-body');
+      body.innerHTML = '';
+
+      Object.keys(summary).sort().forEach(name => {
+        const { paid, owe } = summary[name];
+        const balance = paid - owe;
+        const row = document.createElement('div');
+        row.className = 'summary-row';
+        row.innerHTML = `
+          <div class="text-left" style="padding-left:8px">${escapeHtml(name)}</div>
+          <div>${numberFormat(paid)} đ</div>
+          <div>${numberFormat(owe)} đ</div>
+          <div style="font-weight:700">${balance >= 0 ? '+' : ''}${numberFormat(balance)} đ</div>
+        `;
+        body.appendChild(row);
+      });
+    }
+
+    function formatDate(date) {
+      if (!date) return '';
+      const [y, m, d] = date.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    function numberFormat(num) {
+      return Number(num).toLocaleString('vi-VN');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    }
+
+    function clearHistory() {
+      if (confirm('Xóa toàn bộ lịch sử?')) {
+        expenses = [];
+        localStorage.removeItem('expenses');
+        renderTable();
+        updateSummary();
+      }
+    }
+
+    window.onload = function() {
+      applyTheme(localStorage.getItem('wallet-theme') === 'dark');
+      const saved = localStorage.getItem('expenses');
+      if (saved) {
+        try { expenses = JSON.parse(saved); } catch (e) { expenses = []; }
+      }
+      renderTable();
+      updateSummary();
+      addIndividualRow();
+    };
+  </script>
 </body>
 </html>
